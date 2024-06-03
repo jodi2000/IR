@@ -9,15 +9,26 @@ document.getElementById('search-input').addEventListener('input', function() {
     fetchResultsAndSuggestions(query);
 });
 
-// Mock API function
 function fetchResultsAndSuggestions(query) {
-    // Simulating an API call
-    setTimeout(() => {
-        const data = mockData;
-
+    fetch(`http://127.0.0.1:8080/search?search=${encodeURIComponent(query)}`, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
         displayResults(data.results);
         displaySuggestions(data.suggestions);
-    }, 500); // Simulating network latency
+    })
+    .catch(error => {
+        console.error('Error fetching data:', error);
+    });
 }
 
 function displayResults(results) {
@@ -29,8 +40,12 @@ function displayResults(results) {
         resultItem.classList.add('result-item');
         
         const resultTitle = document.createElement('h3');
-        resultTitle.innerText = result;
+        resultTitle.innerText = result.doc_id;
         resultItem.appendChild(resultTitle);
+
+        const resultCondition = document.createElement('p');
+        resultCondition.innerHTML = `<strong>Text:</strong> ${result.text}`;
+        resultItem.appendChild(resultCondition);
 
         resultsContainer.appendChild(resultItem);
     });
@@ -44,28 +59,8 @@ function displaySuggestions(suggestions) {
         const suggestionItem = document.createElement('div');
         suggestionItem.classList.add('suggestion-item');
         
-        suggestionItem.innerText = suggestion;
+        suggestionItem.innerText = suggestion.text;
 
         suggestionsContainer.appendChild(suggestionItem);
     });
 }
-// Mock data
-const mockData = {
-    results: [
-        "Result 1: Example search result",
-        "Result 2: Another search result",
-        "Result 3: Yet another search result",
-        "Result 4: More search results",
-        "Result 5: Even more search results"
-    ],
-    suggestions: [
-        "Suggestion 1",
-        "Suggestion 2",
-        "Suggestion 3",
-        "Suggestion 4",
-        "Suggestion 5",
-        "Suggestion 5"
-
-    ]
-};
-
